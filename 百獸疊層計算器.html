@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>百獸連敗疊層計算器｜戰棋 S17</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0d1117;
+  color: #e6edf3;
+  font-family: 'Microsoft JhengHei', 'Noto Sans TC', Arial, sans-serif;
+  min-height: 100vh;
+  padding: 28px 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.app-header { text-align: center; margin-bottom: 28px; }
+.app-header h1 {
+  font-size: 22px; font-weight: 700;
+  color: #f0c040; letter-spacing: 2px;
+  text-shadow: 0 0 24px rgba(240,192,64,.35);
+  margin-bottom: 6px;
+}
+.app-header .sub { font-size: 12px; color: #6e7681; letter-spacing: 1px; }
+
+/* ── Card ── */
+.card {
+  background: #161b22;
+  border: 1px solid #30363d;
+  border-radius: 12px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+}
+.card-title {
+  font-size: 12px; font-weight: 700;
+  color: #6e7681; letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title::after { content:''; flex:1; height:1px; background:#21262d; }
+
+/* ── Form ── */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(200px,1fr)); gap: 14px; margin-bottom: 16px; }
+.fg { display: flex; flex-direction: column; gap: 6px; }
+label { font-size: 11px; color: #8b949e; font-weight: 600; letter-spacing: .5px; }
+
+select, input[type="number"] {
+  background: #0d1117;
+  border: 1px solid #30363d;
+  border-radius: 7px;
+  color: #e6edf3;
+  font-size: 14px;
+  padding: 9px 12px;
+  outline: none;
+  width: 100%;
+  transition: border-color .15s;
+}
+select:focus, input:focus { border-color: #f0c040; }
+
+/* ── Break stages ── */
+.break-row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.break-list { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.break-tag {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,123,114,.12);
+  border: 1px solid #ff7b72;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px; color: #ff7b72;
+  animation: popin .15s ease;
+}
+.break-tag button {
+  background: none; border: none; color: #ff7b72;
+  cursor: pointer; font-size: 15px; line-height: 1; padding: 0;
+}
+.break-tag button:hover { color: #fff; }
+@keyframes popin { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ── Buttons ── */
+.btn {
+  padding: 10px 22px; border-radius: 8px; border: none;
+  cursor: pointer; font-size: 14px; font-weight: 700;
+  transition: all .15s; white-space: nowrap;
+}
+.btn-gold { background: #f0c040; color: #0d1117; }
+.btn-gold:hover { background: #ffd700; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(240,192,64,.3); }
+.btn-ghost { background: #21262d; color: #8b949e; border: 1px solid #30363d; }
+.btn-ghost:hover { background: #30363d; color: #e6edf3; }
+
+/* ── Milestone grid ── */
+.ms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+}
+.ms-card {
+  border-radius: 10px; padding: 12px 8px; text-align: center;
+  border: 1px solid #21262d; background: #0d1117;
+  transition: all .2s;
+}
+.ms-card.hit { border-color: #f0c040; background: rgba(240,192,64,.07); }
+.ms-card.miss { opacity: .35; }
+.ms-num { font-size: 20px; font-weight: 800; color: #f0c040; line-height: 1.1; }
+.ms-layer { font-size: 10px; color: #6e7681; margin-bottom: 4px; }
+.ms-stage { font-size: 13px; font-weight: 700; color: #79c0ff; }
+.ms-at { font-size: 10px; color: #6e7681; margin-top: 2px; }
+
+/* ── Summary bar ── */
+.summary-bar {
+  display: flex; gap: 10px; flex-wrap: wrap;
+  padding: 12px 16px;
+  background: #0d1117;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.sbar-item { color: #8b949e; }
+.sbar-item span { color: #e6edf3; font-weight: 700; }
+.sbar-item .highlight { color: #f0c040; }
+
+/* ── Detail table ── */
+.tbl-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid #21262d; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 500px; }
+thead th {
+  background: #0d1117; color: #6e7681;
+  font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+  padding: 10px 14px; text-align: left;
+  border-bottom: 2px solid #21262d;
+  position: sticky; top: 0;
+}
+th.r, td.r { text-align: right; font-variant-numeric: tabular-nums; }
+
+tbody tr { transition: background .1s; }
+tbody tr:hover td { filter: brightness(1.15); }
+tbody td { padding: 8px 14px; border-bottom: 1px solid #161b22; }
+
+/* Tier row colours */
+.t2 td { background: #0d1f14; }
+.t3 td { background: #1a160a; }
+.t4 td { background: #1a0d0c; }
+.t2 .stage-cell { border-left: 3px solid #56d364; color: #56d364; font-weight: 700; }
+.t3 .stage-cell { border-left: 3px solid #e3b341; color: #e3b341; font-weight: 700; }
+.t4 .stage-cell { border-left: 3px solid #ff7b72; color: #ff7b72; font-weight: 700; }
+
+/* Break row */
+.broke td { opacity: .45; font-style: italic; }
+.broke .stage-cell { border-left-color: #ff7b72 !important; color: #ff7b72 !important; }
+
+/* Milestone highlight */
+.ms-row td { background: rgba(240,192,64,.1) !important; }
+.ms-row .stage-cell::before { content: '★ '; color: #f0c040; }
+
+/* Tier separator */
+.tier-sep td { border-top: 2px solid #30363d !important; }
+
+.badge {
+  display: inline-block; font-size: 10px; font-weight: 800;
+  padding: 2px 7px; border-radius: 12px; margin-left: 5px;
+  vertical-align: middle; letter-spacing: .3px;
+}
+.badge-gold { background: #f0c040; color: #0d1117; }
+.badge-red  { background: #ff7b72; color: #0d1117; }
+
+.no-result { text-align: center; color: #6e7681; padding: 40px 0; font-size: 14px; }
+
+/* ── Formula chip ── */
+.formula {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #0d1117; border: 1px solid #30363d;
+  border-radius: 6px; padding: 6px 12px;
+  font-size: 12px; color: #6e7681;
+  margin-bottom: 16px;
+}
+.formula b { color: #79c0ff; }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>🐾 百獸連敗疊層計算器</h1>
+  <p class="sub">聯盟戰棋 S17｜每 100 層開一次獎勵｜最高 800 層</p>
+</div>
+
+<!-- Settings -->
+<div class="card">
+  <div class="card-title">⚙️ 計算設定</div>
+
+  <div class="formula">
+    本回合疊層 = <b>20</b> + <b>連敗場數 × 5</b>
+    &nbsp;（連敗1場=25、2場=30、3場=35…）
+  </div>
+
+  <div class="form-grid">
+    <div class="fg">
+      <label>連敗開始的 Stage</label>
+      <select id="startStage"></select>
+    </div>
+    <div class="fg">
+      <label>計算到哪個 Stage 為止</label>
+      <select id="endStage"></select>
+    </div>
+    <div class="fg">
+      <label>目前已有疊層（初始值）</label>
+      <input type="number" id="initStacks" value="0" min="0" max="800" placeholder="0">
+    </div>
+  </div>
+
+  <div class="fg" style="margin-bottom:14px">
+    <label>預計被斷的 Stage（在此 Stage 贏了，連敗中斷）</label>
+    <div class="break-row">
+      <select id="breakInput" style="width:auto;flex:1;max-width:180px"></select>
+      <button class="btn btn-ghost" onclick="addBreak()">＋ 加入被斷</button>
+      <button class="btn btn-ghost" onclick="clearBreaks()">✕ 清除</button>
+    </div>
+    <div class="break-list" id="breakList"></div>
+  </div>
+
+  <button class="btn btn-gold" onclick="run()">🔢 計算疊層里程碑</button>
+  <button class="btn btn-ghost" style="margin-left:10px" onclick="resetAll()">重置</button>
+</div>
+
+<!-- Results -->
+<div id="results" style="display:none">
+
+  <div class="card">
+    <div class="card-title">🏆 里程碑一覽</div>
+    <div class="ms-grid" id="msGrid"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📊 詳細疊層時間軸</div>
+    <div class="summary-bar" id="summaryBar"></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Stage</th>
+            <th class="r">連敗</th>
+            <th class="r">本回合</th>
+            <th class="r">累積疊層</th>
+            <th>備註</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────
+const ALL_STAGES = [
+  "2-1","2-2","2-3","2-5","2-6",
+  "3-1","3-2","3-3","3-5","3-6",
+  "4-1","4-2","4-3","4-5","4-6"
+];
+const MILESTONES = [100,200,300,400,500,600,700,800];
+let breaks = [];
+
+// ── Init ─────────────────────────────────────────────────────────────────
+(function init() {
+  const ss = document.getElementById('startStage');
+  const es = document.getElementById('endStage');
+  const bi = document.getElementById('breakInput');
+  ALL_STAGES.forEach(s => {
+    const opt = () => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = `Stage ${s}`; return o;
+    };
+    ss.appendChild(opt());
+    es.appendChild(opt());
+    bi.appendChild(opt());
+  });
+  // default end = 4-6
+  es.value = "4-6";
+})();
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+const perRound = n => 20 + 5 * n;
+
+function tierClass(s) {
+  if (s[0]==='2') return 't2';
+  if (s[0]==='3') return 't3';
+  return 't4';
+}
+function tierColor(s) {
+  if (s[0]==='2') return '#56d364';
+  if (s[0]==='3') return '#e3b341';
+  return '#ff7b72';
+}
+
+// ── Break management ──────────────────────────────────────────────────────
+function addBreak() {
+  const v = document.getElementById('breakInput').value;
+  if (!breaks.includes(v)) { breaks.push(v); renderBreaks(); }
+}
+function removeBreak(v) { breaks = breaks.filter(x=>x!==v); renderBreaks(); }
+function clearBreaks() { breaks = []; renderBreaks(); }
+function renderBreaks() {
+  document.getElementById('breakList').innerHTML = breaks.map(s =>
+    `<div class="break-tag">Stage ${s}
+       <button onclick="removeBreak('${s}')" title="移除">✕</button>
+     </div>`
+  ).join('');
+}
+
+// ── Core calculation ──────────────────────────────────────────────────────
+function calcRows(startStage, endStage, initStacks, breakSet) {
+  const si = ALL_STAGES.indexOf(startStage);
+  const ei = ALL_STAGES.indexOf(endStage);
+  if (si < 0 || ei < 0 || ei < si) return [];
+
+  let total = initStacks;
+  let streak = 0;
+  const rows = [];
+
+  for (let i = si; i <= ei; i++) {
+    const stage = ALL_STAGES[i];
+    if (breakSet.has(stage)) {
+      streak = 0;
+      rows.push({ stage, streak: 0, gained: 0, total, broke: true, ms: [] });
+    } else {
+      streak++;
+      const gained = perRound(streak);
+      const prev = total;
+      total += gained;
+      const ms = MILESTONES.filter(m => prev < m && total >= m);
+      rows.push({ stage, streak, gained, total, broke: false, ms });
+    }
+  }
+  return rows;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+function run() {
+  const startStage = document.getElementById('startStage').value;
+  const endStage   = document.getElementById('endStage').value;
+  const initStacks = Math.max(0, parseInt(document.getElementById('initStacks').value)||0);
+  const breakSet   = new Set(breaks);
+
+  const rows = calcRows(startStage, endStage, initStacks, breakSet);
+  if (!rows.length) return;
+
+  // Milestone map
+  const msHit = {};
+  rows.forEach(r => r.ms.forEach(m => { if (!msHit[m]) msHit[m] = r; }));
+
+  // ── Milestone grid
+  document.getElementById('msGrid').innerHTML = MILESTONES.map(m => {
+    const h = msHit[m];
+    if (h) {
+      return `<div class="ms-card hit">
+        <div class="ms-layer">${m} 層</div>
+        <div class="ms-num">✓</div>
+        <div class="ms-stage">Stage ${h.stage}</div>
+        <div class="ms-at">累計 ${h.total} 層</div>
+      </div>`;
+    }
+    return `<div class="ms-card miss">
+      <div class="ms-layer">${m} 層</div>
+      <div class="ms-num">—</div>
+      <div class="ms-stage">未達到</div>
+    </div>`;
+  }).join('');
+
+  // ── Summary bar
+  const finalRow = rows[rows.length-1];
+  const totalLoss = rows.filter(r=>!r.broke).length;
+  const totalWin  = rows.filter(r=>r.broke).length;
+  const reached = MILESTONES.filter(m=>msHit[m]).length;
+  document.getElementById('summaryBar').innerHTML =
+    `<div class="sbar-item">最終累積：<span class="highlight">${finalRow.total} 層</span></div>
+     <div class="sbar-item">落敗場次：<span>${totalLoss}</span></div>
+     <div class="sbar-item">被斷場次：<span>${totalWin}</span></div>
+     <div class="sbar-item">達成里程碑：<span class="highlight">${reached} / ${MILESTONES.length}</span></div>`;
+
+  // ── Detail table
+  let prevTier = null;
+  document.getElementById('tbody').innerHTML = rows.map(r => {
+    const tc  = tierClass(r.stage);
+    const cur = r.stage[0];
+    let rowCls = tc;
+    if (prevTier && cur !== prevTier) rowCls += ' tier-sep';
+    prevTier = cur;
+    if (r.ms.length)  rowCls += ' ms-row';
+    if (r.broke)      rowCls += ' broke';
+
+    const msBadges = r.ms.map(m=>`<span class="badge badge-gold">${m}層 ★</span>`).join('');
+    const brokeBadge = r.broke ? `<span class="badge badge-red">被斷</span>` : '';
+
+    const gainedStr = r.broke
+      ? `<span style="color:#3d444d">— 贏了</span>`
+      : `<span style="color:${tierColor(r.stage)}">+${r.gained}</span>`;
+
+    const streakStr = r.broke
+      ? `<span style="color:#3d444d">—</span>`
+      : r.streak;
+
+    return `<tr class="${rowCls}">
+      <td class="stage-cell">Stage ${r.stage}</td>
+      <td class="r">${streakStr}</td>
+      <td class="r">${gainedStr}</td>
+      <td class="r"><strong>${r.total}</strong></td>
+      <td>${brokeBadge}${msBadges}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function resetAll() {
+  document.getElementById('startStage').value = '2-1';
+  document.getElementById('endStage').value   = '4-6';
+  document.getElementById('initStacks').value  = '0';
+  breaks = []; renderBreaks();
+  document.getElementById('results').style.display = 'none';
+}
+
+// ── Enter key shortcut
+document.addEventListener('keydown', e => { if (e.key==='Enter') run(); });
+</script>
+</body>
+</html>
