@@ -168,6 +168,29 @@ tbody td { padding: 8px 14px; border-bottom: 1px solid #161b22; }
 
 .no-result { text-align: center; color: #6e7681; padding: 40px 0; font-size: 14px; }
 
+/* ── Footer / social ── */
+.app-footer {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #21262d;
+}
+.app-footer .socials { display: flex; justify-content: center; gap: 14px; margin-bottom: 12px; }
+.social-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  border: 1px solid #30363d;
+  background: #161b22;
+  color: #8b949e;
+  transition: all .15s;
+}
+.social-link svg { width: 20px; height: 20px; fill: currentColor; }
+.social-link:hover { transform: translateY(-2px); }
+.social-link.threads:hover { color: #fff; border-color: #fff; box-shadow: 0 4px 14px rgba(255,255,255,.12); }
+.social-link.twitch:hover { color: #bf94ff; border-color: #9146ff; box-shadow: 0 4px 14px rgba(145,70,255,.3); }
+.app-footer .copy { font-size: 11px; color: #6e7681; letter-spacing: .5px; }
+
 /* ── Formula note (plain text) ── */
 .formula {
   font-size: 12px; color: #6e7681;
@@ -250,6 +273,19 @@ tbody td { padding: 8px 14px; border-bottom: 1px solid #161b22; }
   </div>
 
 </div>
+
+<!-- Footer -->
+<footer class="app-footer">
+  <div class="socials">
+    <a class="social-link threads" href="https://www.threads.com/@aumi.mimi" target="_blank" rel="noopener noreferrer" aria-label="Threads">
+      <svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M12.186 24h-.007c-3.581-.024-6.334-1.205-8.184-3.509C2.35 18.44 1.5 15.586 1.472 12.01v-.017c.03-3.579.879-6.43 2.525-8.482C5.845 1.205 8.6.024 12.18 0h.014c2.746.02 5.043.725 6.826 2.098 1.677 1.291 2.858 3.13 3.509 5.467l-2.04.569c-1.104-3.96-3.898-5.984-8.304-6.015-2.91.022-5.11.936-6.54 2.717C4.307 6.504 3.616 8.914 3.589 12c.027 3.086.718 5.496 2.057 7.164 1.43 1.783 3.631 2.698 6.54 2.717 2.623-.02 4.358-.631 5.8-2.045 1.647-1.613 1.618-3.593 1.09-4.798-.31-.71-.873-1.3-1.634-1.75-.192 1.352-.622 2.446-1.284 3.272-.886 1.102-2.14 1.704-3.73 1.79-1.202.065-2.36-.218-3.259-.801-1.063-.689-1.685-1.74-1.752-2.964-.065-1.19.408-2.285 1.33-3.082.88-.76 2.119-1.207 3.583-1.291a13.853 13.853 0 0 1 3.02.142c-.126-.742-.375-1.332-.75-1.757-.513-.586-1.308-.883-2.359-.89h-.029c-.844 0-1.992.232-2.721 1.32L7.475 9.531c.98-1.452 2.568-2.25 4.6-2.25h.043c3.393.021 5.414 2.108 5.615 5.736.115.048.229.097.34.149 1.566.737 2.715 1.852 3.293 3.165 1.078 2.45.045 5.642-2.467 8.082C16.665 23.062 14.703 23.97 12.186 24Zm1.043-12.745c-.327 0-.66.009-.999.027-1.99.116-3.13 1.034-3.13 2.13 0 .79.622 1.494 1.997 1.494.038 0 .076 0 .114-.003 1.524-.073 2.564-1.118 2.738-2.964a8.532 8.532 0 0 0-.72-.684Z"/></svg>
+    </a>
+    <a class="social-link twitch" href="https://www.twitch.tv/aumimimi" target="_blank" rel="noopener noreferrer" aria-label="Twitch">
+      <svg viewBox="0 0 24 24" role="img" aria-hidden="true"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
+    </a>
+  </div>
+  <p class="copy">追蹤 @aumi.mimi ｜ 戰棋 S17 百獸連敗疊層計算器</p>
+</footer>
 
 <script>
 // ── Data ─────────────────────────────────────────────────────────────────
